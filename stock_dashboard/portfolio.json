@@ -1,0 +1,14 @@
+[
+  {
+    "ticker": "AAPL",
+    "name": "AAPL"
+  },
+  {
+    "ticker": "NVDA",
+    "name": "NVDA"
+  },
+  {
+    "ticker": "TSLA",
+    "name": "TSLA"
+  }
+]
