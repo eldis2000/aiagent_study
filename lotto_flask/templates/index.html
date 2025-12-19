@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <title>🎱 로또 + 🐍 스네이크 + 🤖 Ollama 챗봇</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+
+  <style>
+    :root {
+      --bg1: #0f172a;
+      --bg2: #1e293b;
+      --accent: #3b82f6;
+      --text: #f8fafc;
+      --subtext: #cbd5e1;
+    }
+    body {
+      margin: 0;
+      font-family: 'Inter', sans-serif;
+      background: linear-gradient(135deg, var(--bg1), var(--bg2));
+      color: var(--text);
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 40px;
+      padding: 40px;
+    }
+    .card {
+      backdrop-filter: blur(14px);
+      background: rgba(255, 255, 255, 0.07);
+      border-radius: 20px;
+      padding: 25px;
+      width: 340px;
+      box-shadow: 0 8px 30px rgba(0,0,0,0.3);
+    }
+    h1 {
+      text-align: center;
+      color: var(--accent);
+      margin-bottom: 10px;
+    }
+    .button {
+      background: var(--accent);
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: 600;
+      transition: 0.2s ease-in-out;
+    }
+    .button:hover {
+      background: #2563eb;
+      transform: scale(1.03);
+    }
+    select {
+      background: rgba(255,255,255,0.1);
+      color: var(--text);
+      border: 1px solid rgba(255,255,255,0.2);
+      border-radius: 8px;
+      padding: 6px 10px;
+      margin-left: 8px;
+    }
+    .chip {
+      display: inline-block;
+      width: 42px;
+      height: 42px;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.1);
+      border: 1px solid rgba(255,255,255,0.2);
+      line-height: 42px;
+      margin: 5px;
+      font-weight: bold;
+      font-size: 18px;
+    }
+    /* Snake */
+    canvas {
+      display: block;
+      margin: 0 auto;
+      background: #111827;
+      border-radius: 10px;
+      border: 2px solid rgba(255,255,255,0.15);
+      box-shadow: 0 0 20px rgba(59,130,246,0.4);
+    }
+    /* Chatbot */
+    #chatbox {
+      background: rgba(255,255,255,0.05);
+      border-radius: 10px;
+      padding: 10px;
+      height: 300px;
+      overflow-y: auto;
+      margin-bottom: 10px;
+    }
+    .msg { margin: 8px 0; padding: 8px 12px; border-radius: 8px; max-width: 90%; }
+    .user { background: rgba(59,130,246,0.3); align-self: flex-end; }
+    .bot { background: rgba(255,255,255,0.1); }
+    #chat-container { display: flex; flex-direction: column; height: 380px; }
+    #chat-input {
+      width: calc(100% - 90px);
+      padding: 10px;
+      border-radius: 8px;
+      border: 1px solid rgba(255,255,255,0.2);
+      background: rgba(255,255,255,0.1);
+      color: white;
+      outline: none;
+    }
+    #send-btn {
+      width: 70px;
+      background: var(--accent);
+      border: none;
+      border-radius: 8px;
+      color: white;
+      cursor: pointer;
+      margin-left: 10px;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- 🎱 로또 생성기 -->
+  <div class="card">
+    <h1>🎱 로또 번호 생성기</h1>
+    <form method="GET" action="/">
+      <label>세트 수:
+        <select name="count">
+          {% for n in range(1, 6) %}
+            <option value="{{n}}" {% if n == count %}selected{% endif %}>{{n}}</option>
+          {% endfor %}
+        </select>
+      </label>
+      <button type="submit" class="button">생성하기</button>
+    </form>
+
+    {% if results %}
+      <h2>결과</h2>
+      {% for numbers in results %}
+        <div style="text-align:center;">
+          <strong style="color:#94a3b8;">세트 {{ loop.index }}</strong><br>
+          {% for n in numbers %}
+            <span class="chip">{{ n }}</span>
+          {% endfor %}
+        </div>
+      {% endfor %}
+    {% endif %}
+  </div>
+
+  <!-- 🐍 Snake Game -->
+  <div class="card">
+    <h1>🐍 스네이크 게임</h1>
+    <canvas id="snake" width="300" height="300"></canvas>
+    <p style="text-align:center;">⬅️➡️⬆️⬇️ 방향키로 조작</p>
+  </div>
+
+  <!-- 🤖 Ollama 챗봇 -->
+  <div class="card">
+    <h1>🤖 Ollama Chat</h1>
+    <div id="chat-container">
+      <div id="chatbox"></div>
+      <div style="display:flex; margin-top:auto;">
+        <input id="chat-input" type="text" placeholder="메시지를 입력하세요..." />
+        <button id="send-btn">전송</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="{{ url_for('static', filename='snake.js') }}"></script>
+
+  <script>
+    // Chatbot JS
+    const chatBox = document.getElementById("chatbox");
+    const chatInput = document.getElementById("chat-input");
+    const sendBtn = document.getElementById("send-btn");
+
+    function appendMessage(text, cls) {
+      const div = document.createElement("div");
+      div.className = `msg ${cls}`;
+      div.innerText = text;
+      chatBox.appendChild(div);
+      chatBox.scrollTop = chatBox.scrollHeight;
+    }
+
+    async function sendMessage() {
+      const text = chatInput.value.trim();
+      if (!text) return;
+      appendMessage(text, "user");
+      chatInput.value = "";
+
+      try {
+        const res = await fetch("/chat", {
+          method: "POST",
+          headers: {"Content-Type": "application/json"},
+          body: JSON.stringify({message: text})
+        });
+        const data = await res.json();
+        if (data.reply) appendMessage(data.reply, "bot");
+        else appendMessage("⚠️ 오류: " + (data.error || "응답 없음"), "bot");
+      } catch (err) {
+        appendMessage("❌ 서버 오류: " + err.message, "bot");
+      }
+    }
+
+    sendBtn.addEventListener("click", sendMessage);
+    chatInput.addEventListener("keypress", e => { if (e.key === "Enter") sendMessage(); });
+  </script>
+</body>
+</html>
