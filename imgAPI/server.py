@@ -14,7 +14,7 @@ import os
 # --- 1. API 키 설정 (Gemini API Key를 환경 변수에서 가져오거나 여기에 직접 입력) ---
 # 환경 변수 사용을 강력히 권장합니다.
 # API_KEY = os.environ.get("GEMINI_API_KEY") 
-API_KEY = "AIzaSyCeJD89VCwohrxWUss1iyJIjQjYB7zP_Us"  # <-- 여기에 실제 키를 넣어주세요.
+API_KEY = ""  # <-- 여기에 실제 키를 넣어주세요.
 
 if not API_KEY or API_KEY == "YOUR_API_KEY_HERE":
     print("❌ 경고: API 키가 설정되지 않았습니다. API_KEY 변수에 유효한 키를 입력하거나 환경 변수를 설정하세요.")
