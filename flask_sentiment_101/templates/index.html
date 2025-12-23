@@ -1,0 +1,27 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8" />
+  <title>감성분석 Flask 101</title>
+  <style>
+    body { font-family: system-ui, sans-serif; max-width: 900px; margin: 40px auto; }
+    textarea { width: 100%; height: 140px; padding: 12px; font-size: 16px; }
+    button { padding: 10px 16px; font-size: 16px; margin-top: 10px; }
+    .card { margin-top: 18px; padding: 14px; border: 1px solid #ddd; border-radius: 12px; }
+  </style>
+</head>
+<body>
+  <h1>🧠 감성분석 웹앱 (Flask 101)</h1>
+
+  <form method="POST">
+    <textarea name="text" placeholder="문장을 입력하세요">{{ text }}</textarea><br/>
+    <button type="submit">분석하기</button>
+  </form>
+
+  {% if result %}
+  <div class="card">
+    <b>결과:</b> {{ result.label }} ({{ result.score }}%)
+  </div>
+  {% endif %}
+</body>
+</html>
