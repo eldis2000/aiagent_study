@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>PDF 요약기 (transformers)</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #f4f4f4;
+            padding: 40px;
+        }
+        .box {
+            background: white;
+            max-width: 720px;
+            margin: auto;
+            padding: 30px;
+            border-radius: 8px;
+        }
+        button {
+            margin-top: 12px;
+            padding: 10px 16px;
+        }
+        .result {
+            margin-top: 20px;
+            white-space: pre-line;
+            background: #fafafa;
+            padding: 15px;
+            border-radius: 6px;
+        }
+        .option {
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+<div class="box">
+    <h2>📄 PDF 문서 요약</h2>
+    <p>transformers 기반 · 로컬 실행</p>
+
+    <form method="post" enctype="multipart/form-data">
+        <input type="file" name="pdf" accept=".pdf" required>
+
+        <div class="option">
+            <label>
+                <input type="radio" name="summary_type" value="short" checked>
+                짧게 요약
+            </label>
+
+            <label style="margin-left: 20px;">
+                <input type="radio" name="summary_type" value="long">
+                자세히 요약
+            </label>
+        </div>
+
+        <button type="submit">요약하기</button>
+    </form>
+
+    {% if summary %}
+    <div class="result">
+        <h3>📝 요약 결과</h3>
+        {{ summary }}
+    </div>
+    {% endif %}
+</div>
+</body>
+</html>
